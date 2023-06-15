@@ -1,0 +1,61 @@
+{% load static %}
+
+{% block content %}
+    <nav class="navbar bg-light fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
+                <span class="navbar-toggler-icon">
+                    <img class="img-responsive img-fluid" src="{% static 'img/page_icon/png/Hamburger.png' %}">
+                </span>
+            </button>
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Services Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarITDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Information Technology
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarITDropdownMenuLink">
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarBIDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Business Intelligence &raquo;
+                                        </a>
+                                        <ul class="submenu dropdown-menu" aria-labelledby="navbarBIDropdownMenuLink">
+                                            <li><a class="dropdown-item" href="#">Business Analysis</a></li>
+                                            <li><a class="dropdown-item" href="#">Data Engineering</a></li>
+                                            <li><a class="dropdown-item" href="#">Strategic Consulting</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <li><a class="dropdown-item" href="information_technology/network_engineering">Network Engineering</a></li>
+                                    <li><a class="dropdown-item" href="information_technology/web_development">Web Development</a></li>
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Strategic Marketing
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <li><a class="dropdown-item" href="#">Advertising & Traditional Marketing</a></li>
+                                    <li><a class="dropdown-item" href="./strategic_marketing/buzz_marketing">Buzz & Promotional Marketing</a></li>
+                                    <li><a class="dropdown-item" href="#">Social Media Marketing</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script type="text/javascript" id="defer-js" src="https://cdn.jsdelivr.net/npm/@shinsenter/defer.js@2.6.0/dist/defer_plus.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="{% static 'js/DOMContentLoaded.js' %}"></script>
+{% endblock content %}
