@@ -1,0 +1,149 @@
+body,
+html {
+	height: 100%;
+}
+
+.async-hide{opacity:0 !important}
+
+body>article>header>a {
+	color: #ffa089;
+	font-family: Tangerine, Katibeh, cursive;
+	text-shadow: 2px 2px #fff;
+}
+
+body>article>header>a>center>h1 {
+	font-size: 72px;
+}
+
+.carousel,.item,.active{
+   max-height:100%;
+ }
+
+.carousel-inner{
+    max-height:100%;
+}
+
+a>figcaption {
+	font-size: 18px
+}
+
+/* a>img {
+	object-fit: fill;
+} */
+
+body>article>footer>details {
+	color: #eae0c8;
+}
+
+body>article>footer>details>aside>div {
+	background-image: url(https://coresites-cdn.factorymedia.com/cooler_new/wp-content/uploads/2017/03/iStock-495731108.jpg);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+body>footer>nav>a {
+	color: #ff2400;
+}
+
+.breadcrumb {
+	background-color: #f0ead6;
+	font-family: 'Poiret One', Katibeh, Tangerine, cursive;
+}
+
+.container {
+	margin: 0 auto;
+	max-width: 800px;
+	position: relative;
+}
+
+.container .content {
+	background: #000;
+	background: rgba(0, 0, 0, .5);
+	bottom: 0;
+	color: #f1f1f1;
+	position: absolute;
+	width: 100%;
+}
+
+figcaption {
+	color: #05f9fe;
+	text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.jumbotron {
+	background-color: #0abab5;
+}
+
+.lead {
+	color: gold;
+	font-family: Tangerine, 'Poiret One', Katibeh, cursive;
+}
+
+.box {
+    position:absolute;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+	display:flex;
+	justify-content:center;
+	align-items:center;
+	flex-direction: column;
+}
+
+.box h1 {
+    color: #fff;
+}
+
+.box h4 {
+    color: #f3f1f1;
+}
+body > div > header > a > img {
+    height: auto;
+    max-width: 25%;
+}
+
+body > div > header > a > img.center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h2.lead {
+    font-size: 32px;
+    text-align: center;
+}
+
+#carouselExampleFade img {
+	width:auto;
+	max-height:360px;
+}
+
+body > nav > div.container-fluid {
+	background-color: #0abab5;
+}
+
+
+/* ============ desktop view ============ */
+@media all and (min-width: 992px) {
+	.dropdown-menu li{ position: relative; 	}
+	.nav-item .submenu{
+		display: none;
+		position: absolute;
+		left:100%; top:-7px;
+	}
+	.nav-item .submenu-left{
+		right:100%; left:auto;
+	}
+	.dropdown-menu > li:hover{ background-color: #f1f1f1 }
+	.dropdown-menu > li:hover > .submenu{ display: block; }
+}
+/* ============ desktop view .end// ============ */
+
+/* ============ small devices ============ */
+@media (max-width: 991px) {
+  .dropdown-menu .dropdown-menu{
+      margin-left:0.7rem; margin-right:0.7rem; margin-bottom: .5rem;
+  }
+}
+/* ============ small devices .end// ============ */
