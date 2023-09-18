@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from .models import Employee, TaxRate
+from .models import TaxRate
 
-admin.site.register(Employee)
 admin.site.register(TaxRate)
