@@ -8,7 +8,7 @@ The legacy marketing Django project previously stored its signing key and Google
 
 ## Sensitive payroll data
 
-The legacy Employee model includes a Social Security number field. The older intake view accepted an SSN form but did not store the submitted value. That intake view is now disabled with HTTP 410 Gone, and the current project URL configuration does not route to the payroll intake. Do not reactivate it.
+The legacy Employee model includes a Social Security number field. The older intake view accepted an SSN form but did not store the submitted value. That intake view now returns HTTP 410 Gone and is not routed. The payroll app has been removed from `INSTALLED_APPS`, and the retained Employee SSN field is non-editable and not registered in admin. Existing data is preserved; do not reactivate collection or display.
 
 Before any future SSN or payroll workflow is implemented, require a security and privacy design that covers a lawful collection purpose, encryption at rest and in transit, access controls and least privilege, audit trails, retention/deletion, backups, incident response, and appropriate legal/compliance review. Never write full SSNs to application logs, analytics, emails, or client-side storage.
 
