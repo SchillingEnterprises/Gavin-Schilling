@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 import unittest
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "Business/Marketing/gavin_schilling_marketing"
 SETTINGS = (APP / "gavin_schilling_marketing/settings.py").read_text(encoding="utf-8")
 CREDENTIALS = (APP / "gavin_schilling_marketing/credentials.py").read_text(encoding="utf-8")
