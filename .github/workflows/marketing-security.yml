@@ -22,5 +22,5 @@ jobs:
           python-version: "3.12"
       - name: Compile marketing Django source
         run: python -m compileall -q Business/Marketing/gavin_schilling_marketing
-      - name: Run sensitive-configuration checks
+      - name: Run public-site and sensitive-configuration checks
         run: python -m unittest discover -s tests -v
