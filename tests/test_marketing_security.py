@@ -38,6 +38,24 @@ class MarketingSecurityTests(unittest.TestCase):
         self.assertNotIn("request.POST", SSN_VIEW)
         self.assertNotIn("SocialSecurityNumberForm", SSN_VIEW)
 
+    def test_legacy_payroll_app_is_not_loaded(self):
+        self.assertNotIn("payroll.apps.PayrollConfig", SETTINGS)
+        urls = (APP / "gavin_schilling_marketing/urls.py").read_text(encoding="utf-8")
+        self.assertNotIn("payroll.urls", urls)
+
+    def test_employee_ssn_field_is_non_editable_and_not_admin_registered(self):
+        models = (APP / "website/models.py").read_text(encoding="utf-8")
+        admin = (APP / "website/admin.py").read_text(encoding="utf-8")
+        self.assertIn("USSocialSecurityNumberField(blank=True, null=True, editable=False)", models)
+        self.assertNotIn("Employee", admin)
+
+    def test_ssn_non_editable_migration_preserves_the_column(self):
+        migration = (APP / "website/migrations/0002_employee_ssn_non_editable.py").read_text(encoding="utf-8")
+        self.assertIn('name="social_security_number"', migration)
+        self.assertIn("editable=False", migration)
+        self.assertNotIn("RunPython", migration)
+        self.assertNotIn("DeleteModel", migration)
+
     def test_local_environment_template_contains_only_placeholders(self):
         template = (APP / ".env.example").read_text(encoding="utf-8")
         self.assertIn("DJANGO_SECRET_KEY=generate-a-long-random-secret", template)
