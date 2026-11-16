@@ -1,0 +1,74 @@
+name: Gavin Schilling root-site Pages
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gavin-schilling-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Validate and stage the public root website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v6
+        with:
+          python-version: "3.12"
+      - name: Validate public website links and accessibility basics
+        run: python -m unittest discover -s tests -v
+      - name: Stage only approved public website paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for page in index.html about.html contact.html insights.html privacy.html services.html work.html 404.html; do
+            test -f "$page"
+            cp "$page" dist/
+          done
+          test -d assets
+          test -d services
+          cp -R assets services dist/
+          if [ -f robots.txt ]; then cp robots.txt dist/; fi
+          if [ -f CNAME ]; then cp CNAME dist/; fi
+          test -f dist/index.html
+          test -d dist/assets
+          test -d dist/services
+          test ! -e dist/Business
+          test ! -e dist/"File On Hold"
+          test ! -e dist/.github
+          if find dist -type f \( -name '*.py' -o -name '*.sqlite3' -o -name '.env' \) -print -quit | grep -q .; then
+            echo "Unexpected backend, database, or environment file in Pages artifact." >&2
+            exit 1
+          fi
+      - name: Upload root-site Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: Publish root website
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
