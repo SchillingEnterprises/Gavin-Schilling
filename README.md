@@ -23,7 +23,9 @@ The root Pages site is not the same application as the nested Django marketing/p
 
 ## Deployment
 
-The root website is published through GitHub Pages. The nested Django project requires a separate backend host and is not executed by GitHub Pages.
+The root website is published through the pinned GitHub Actions Pages workflow in `.github/workflows/pages.yml`. The workflow validates the public pages and stages an explicit allowlist of root HTML pages plus the `assets/` and `services/` directories. It does not publish the nested Django applications, operations archive, client/logo collection, or other business project folders. In repository Settings → Pages, select **GitHub Actions** as the build source.
+
+The nested Django project requires a separate backend host and is not executed by GitHub Pages. Keep the root Pages artifact limited to the public brand website; do not replace the allowlist with a repository-wide copy.
 
 ## Content and privacy safeguards
 
