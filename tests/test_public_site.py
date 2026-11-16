@@ -113,6 +113,20 @@ class PublicWebsiteTests(unittest.TestCase):
                 failures.append(f"{page.relative_to(ROOT)}: {href}")
         self.assertEqual(failures, [])
 
+    def test_pages_workflow_stages_only_the_approved_root_site(self):
+        workflow = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
+        self.assertIn(
+            "for page in index.html about.html contact.html insights.html privacy.html services.html work.html 404.html",
+            workflow,
+        )
+        self.assertIn("cp -R assets services dist/", workflow)
+        self.assertIn("path: dist", workflow)
+        self.assertIn("test ! -e dist/Business", workflow)
+        self.assertIn('test ! -e dist/"File On Hold"', workflow)
+        self.assertNotIn("cp -R . ", workflow)
+        self.assertNotIn("Business/Marketing", workflow)
+
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
