@@ -46,7 +46,7 @@ class Employee (models.Model):
     zip_code = USPostalCodeField(name='Zip Code', blank=True, null=True)
 
     gender = models.CharField(max_length=7)
-    social_security_number = USSocialSecurityNumberField(blank=True, null=True)
+    social_security_number = USSocialSecurityNumberField(blank=True, null=True, editable=False)
 
     class EmploymentType(models.TextChoices):
         W2 = 'W-2', _('Employee')
