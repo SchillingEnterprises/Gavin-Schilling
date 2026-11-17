@@ -22,6 +22,8 @@ class PageAudit(HTMLParser):
     def __init__(self):
         super().__init__()
         self.references = []
+        self.fragment_targets = []
+        self.element_ids = []
         self.images_without_alt = []
         self.external_blank_links_without_noopener = []
         self.lang = None
@@ -40,10 +42,14 @@ class PageAudit(HTMLParser):
             self.viewport_seen = True
         if tag == "main":
             self.main_seen = True
+        if attrs.get("id"):
+            self.element_ids.append(attrs["id"])
         for key in ("href", "src"):
             value = attrs.get(key, "")
             if value:
                 self.references.append(value)
+                if key == "href" and value.startswith("#") and len(value) > 1:
+                    self.fragment_targets.append(value[1:])
         if tag == "img" and "alt" not in attrs:
             self.images_without_alt.append(attrs.get("src", "(unnamed image)"))
         if tag == "a" and attrs.get("target") == "_blank":
@@ -93,6 +99,22 @@ class PublicWebsiteTests(unittest.TestCase):
                     failures.append(f"{page.relative_to(ROOT)} escapes repository: {reference}")
                 elif not target.exists():
                     failures.append(f"{page.relative_to(ROOT)} -> missing {reference}")
+        self.assertEqual(failures, [], "\\n".join(failures))
+
+    def test_internal_fragment_links_resolve_to_unique_ids(self):
+        failures = []
+        for page in PUBLIC_PAGES:
+            parser = PageAudit()
+            parser.feed(page.read_text(encoding="utf-8"))
+            duplicates = sorted({
+                identifier for identifier in parser.element_ids
+                if parser.element_ids.count(identifier) > 1
+            })
+            missing = sorted(set(parser.fragment_targets) - set(parser.element_ids))
+            if duplicates:
+                failures.append(f"{page.relative_to(ROOT)}: duplicate IDs {duplicates}")
+            if missing:
+                failures.append(f"{page.relative_to(ROOT)}: broken fragments {missing}")
         self.assertEqual(failures, [], "\\n".join(failures))
 
     def test_images_have_alt_attributes(self):
