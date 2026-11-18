@@ -18,9 +18,9 @@ This repository contains multiple projects and historical work areas. This catal
 
 **Type:** Django 4.1-era application with a marketing website, website models, a payroll module, and a Dockerfile.
 
-**Security boundary:** the legacy employee model contains a Social Security number field. The public SSN handler is disabled in the current security maintenance branch and returns HTTP 410 without reading submitted data. The current root URL configuration does not route to payroll intake, but the handler is disabled as an additional fail-closed measure. Do not reactivate SSN collection without encryption, least-privilege access, audit logging, retention/deletion, backups, incident response, and legal/privacy review.
+**Security boundary:** the legacy employee model contains a Social Security number field. The public SSN handler is disabled on `master` and returns HTTP 410 without reading submitted data. The current root URL configuration does not route to payroll intake, but the handler remains disabled as an additional fail-closed measure. Do not reactivate SSN collection without encryption, least-privilege access, audit logging, retention/deletion, backups, incident response, and legal/privacy review.
 
-**Credential boundary:** the historical Django signing key and Google API key were embedded in public source. The security branch moves them to environment configuration, but old values remain in Git history. Revoke/rotate any still-active Google key and generate a new Django signing key before deployment.
+**Credential boundary:** the historical Django signing key and Google API key were embedded in public source. [PR #2](https://github.com/SchillingEnterprises/Gavin-Schilling/pull/2) merged the environment-driven configuration and removed the values from current source. Old values remain in Git history; this code change does not revoke or rotate them. Revoke any still-active historical Google key and generate a new Django signing key before deployment.
 
 **Runtime status:** the pinned Django 4.1 release is end-of-life. This project is not ready for production until the framework, third-party dependencies, database setup, authentication, and hosting target are upgraded and tested.
 
@@ -65,7 +65,8 @@ This repository contains multiple projects and historical work areas. This catal
 - Any future extraction into separate repositories should retain Git history (for example, using a history-aware subtree/filter workflow) and be reviewed before changing links or deleting the original paths.
 - Run security and rights reviews before exposing logo libraries, client names, tenant/employee fields, or other personal information.
 
-## Current review branches
+## Security maintenance record
 
-- [Marketing/payroll security hardening PR](https://github.com/SchillingEnterprises/Gavin-Schilling/pull/2) — environment-driven secrets, safer defaults, disabled SSN intake, and source checks.
-- This catalogue is a documentation-only change and does not merge or deploy any nested application.
+- [PR #2](https://github.com/SchillingEnterprises/Gavin-Schilling/pull/2) — merged November 16, 2026. It moved Django and Google credentials to environment configuration, set safer defaults, disabled public SSN intake with HTTP 410, and added source-level security checks.
+- Owner follow-up remains: revoke/rotate historical credentials in their provider consoles and generate a fresh Django signing key before any deployment.
+- This catalogue is a documentation-only change and does not deploy the nested application.
