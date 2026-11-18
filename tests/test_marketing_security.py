@@ -29,6 +29,10 @@ class MarketingSecurityTests(unittest.TestCase):
             with self.subTest(item=item):
                 self.assertIn(item, SETTINGS)
 
+    def test_database_path_is_environment_configurable_for_isolated_ci(self):
+        self.assertIn('"DJANGO_DB_NAME"', SETTINGS)
+        self.assertIn("Business/Marketing/gavin_schilling_marketing/db.sqlite3", SETTINGS)
+
     def test_google_key_comes_from_environment(self):
         self.assertIn('os.environ.get("GOOGLE_API_KEY", "")', CREDENTIALS)
         self.assertNotRegex(CREDENTIALS, r"AIza[0-9A-Za-z_-]{20,}")

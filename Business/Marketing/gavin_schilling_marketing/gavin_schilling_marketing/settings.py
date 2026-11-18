@@ -105,7 +105,12 @@ WSGI_APPLICATION = 'gavin_schilling_marketing.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'Business/Marketing/gavin_schilling_marketing/db.sqlite3',
+        # Keep the historical project database as the local default, while
+        # allowing CI and hosted environments to use an isolated database.
+        'NAME': os.environ.get(
+            "DJANGO_DB_NAME",
+            str(BASE_DIR / 'Business/Marketing/gavin_schilling_marketing/db.sqlite3'),
+        ),
     }
 }
 
