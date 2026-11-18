@@ -32,6 +32,8 @@ The nested Django project requires a separate backend host and is not executed b
 - No unverified client-logo carousel is presented on the root site.
 - No personal address or telephone metadata is included in the root site.
 - No claims that prototypes are deployed products.
-- The nested payroll/SSN intake is disabled in the security maintenance branch until a secure data-processing design is completed.
+- The nested payroll/SSN intake is disabled on `master`; the security hardening was merged in [PR #2](https://github.com/SchillingEnterprises/Gavin-Schilling/pull/2). The endpoint returns HTTP 410 and does not process submitted identifiers.
+- Historical signing-key and Google API-key values remain in Git history. Revoke any still-active historical Google key and use a newly generated Django signing key before any deployment; current source configuration alone cannot rotate credentials.
+- The nested Django application still uses an end-of-life Django 4.1 release and is not production-ready.
 - Review brand/logo permissions and personal-data exposure before publishing nested operations or client assets.
 - Marketing is integrated-selective, not a general-purpose agency offer.
