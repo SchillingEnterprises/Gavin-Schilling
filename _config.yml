@@ -1,1 +1,29 @@
 theme: jekyll-theme-architect
+
+# GitHub Pages is only for the approved root marketing website.
+# Nested applications and archival projects have separate security,
+# ownership, and deployment boundaries and must not enter the Pages artifact.
+exclude:
+  - Business/
+  - "File On Hold/"
+  - .github/
+  - .gitignore
+  - README.md
+  - PROJECTS.md
+  - LICENSE
+  - SECURITY.md
+  - CONTRIBUTING.md
+  - requirements.txt
+  - tests/
+  - "*.py"
+  - "**/*.py"
+  - "*.sqlite3"
+  - "**/*.sqlite3"
+  - "*.db"
+  - "**/*.db"
+  - "*.bak"
+  - "**/*.bak"
+  - ".env"
+  - ".env.*"
+  - "**/.env"
+  - "**/.env.*"
