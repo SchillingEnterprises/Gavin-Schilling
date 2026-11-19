@@ -35,6 +35,8 @@ Do not upgrade the Django version by changing only the `Django==4.1` line:
 
 The preferred framework target is the Django 5.2 LTS series, currently at 5.2.19, with extended support through April 2028. Use a maintained Python runtime (3.12 or newer) for the upgraded app and CI.
 
+The current GitHub Actions workflow also still runs Python 3.10. Python 3.10 reached upstream end-of-life on October 1, 2026 and no longer receives security updates. Move CI and any deployment runtime to a supported Python release as part of the same staged upgrade; do not treat the current green Python 3.10 run as evidence of a supported runtime.
+
 ### Required upgrade sequence
 
 1. Inventory the app's active imports, model fields, forms, admin usage, and migration dependencies for `address`, localflavor, money, and phone-number packages.
