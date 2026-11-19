@@ -66,5 +66,24 @@ class MarketingSecurityTests(unittest.TestCase):
         self.assertNotRegex(template, r"AIza[0-9A-Za-z_-]{20,}")
 
 
+class MarketingSensitiveIntakeRuntimeTests(unittest.TestCase):
+    def test_ssn_intake_view_returns_gone_without_reading_request_data(self):
+        """Execute the retired endpoint with a request object that has no body API."""
+        from importlib.util import module_from_spec, spec_from_file_location
+
+        view_path = APP / "payroll" / "views.py"
+        spec = spec_from_file_location("gavin_payroll_views_under_test", view_path)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        # The view must not need request.POST, request.body, a session, or a user.
+        response = module.get_social_security_number(object())
+
+        self.assertEqual(response.status_code, 410)
+        self.assertIn(b"intake is disabled", response.content)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
