@@ -37,3 +37,7 @@ The nested Django project requires a separate backend host and is not executed b
 - The nested Django application still uses an end-of-life Django 4.1 release and is not production-ready.
 - Review brand/logo permissions and personal-data exposure before publishing nested operations or client assets.
 - Marketing is integrated-selective, not a general-purpose agency offer.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for this repository's security, privacy, and responsible-use guidance.
