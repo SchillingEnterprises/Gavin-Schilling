@@ -1,6 +1,9 @@
 """Source-level guardrails for the legacy marketing/payroll Django project."""
 from pathlib import Path
+import os
 import re
+import subprocess
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +14,52 @@ SSN_VIEW = (APP / "payroll/views.py").read_text(encoding="utf-8")
 
 
 class MarketingSecurityTests(unittest.TestCase):
+    def test_invalid_boolean_environment_value_fails_closed(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "gavin_schilling_marketing.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "tru",
+            "PYTHONPATH": str(ROOT / "Business/Marketing/gavin_schilling_marketing"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; print(settings.DEBUG)"],
+            cwd=ROOT / "Business/Marketing/gavin_schilling_marketing",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("DJANGO_DEBUG must be an explicit boolean value", result.stderr)
+
+    def test_explicit_false_boolean_environment_values_are_supported(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "gavin_schilling_marketing.settings",
+            "DJANGO_SECRET_KEY": "test-only-settings-key",
+            "DJANGO_DEBUG": "false",
+            "DJANGO_SECURE_SSL_REDIRECT": "off",
+            "DJANGO_SESSION_COOKIE_SECURE": "0",
+            "DJANGO_CSRF_COOKIE_SECURE": "no",
+            "PYTHONPATH": str(ROOT / "Business/Marketing/gavin_schilling_marketing"),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", (
+                "from django.conf import settings; "
+                "assert settings.DEBUG is False; "
+                "assert settings.SECURE_SSL_REDIRECT is False; "
+                "assert settings.SESSION_COOKIE_SECURE is False; "
+                "assert settings.CSRF_COOKIE_SECURE is False"
+            )],
+            cwd=ROOT / "Business/Marketing/gavin_schilling_marketing",
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
     def test_secret_and_debug_are_environment_driven(self):
         self.assertIn('os.environ.get("DJANGO_SECRET_KEY")', SETTINGS)
         self.assertIn('DEBUG = env_bool("DJANGO_DEBUG", False)', SETTINGS)
