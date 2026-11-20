@@ -1,6 +1,8 @@
 # Gavin Schilling | Schilling Enterprises
 
-Static responsive brand website for GitHub Pages.
+Static, responsive brand website for GitHub Pages. It uses native HTML, CSS, and
+small dependency-free JavaScript enhancements; no build-time framework or
+third-party client runtime is required.
 
 ## Brand
 
@@ -12,7 +14,10 @@ Connect strategy. Build what matters.
 
 - Home, Services, Work, About, Insights, Contact
 - Six service pages under `services/`
-- Shared stylesheet at `assets/css/site.css`
+- Shared stylesheets at `assets/css/site.css` and `assets/css/enhancements.css`
+- Accessible mobile navigation, saved light/dark theme preference, and a
+  client-side service finder
+- Honors the operating system's color preference and reduced-motion setting
 - Static hosting via GitHub Pages; no server-side runtime is required for this root site
 
 ## Repository map
