@@ -135,6 +135,20 @@ class PublicWebsiteTests(unittest.TestCase):
                 failures.append(f"{page.relative_to(ROOT)}: {href}")
         self.assertEqual(failures, [])
 
+    def test_site_enhancements_are_loaded_on_every_public_page(self):
+        failures = []
+        for page in PUBLIC_PAGES:
+            parser = PageAudit()
+            parser.feed(page.read_text(encoding="utf-8"))
+            prefix = "" if page.parent == ROOT else "../"
+            for expected in (
+                f"{prefix}assets/js/site.js",
+                f"{prefix}assets/css/enhancements.css",
+            ):
+                if expected not in parser.references:
+                    failures.append(f"{page.relative_to(ROOT)}: missing {expected}")
+        self.assertEqual(failures, [], "\n".join(failures))
+
     def test_pages_workflow_stages_only_the_approved_root_site(self):
         workflow = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
         self.assertIn(
