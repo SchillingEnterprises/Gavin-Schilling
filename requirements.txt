@@ -7,7 +7,7 @@ django-money==3.6.2
 django-phonenumber-field==9.0.0
 phonenumbers==9.0.44
 py-moneyed==3.0
-python-stdnum==1.17
+python-stdnum==2.2
 sqlparse==0.6.1
 typing_extensions==4.16.0
 tzdata==2026.6
