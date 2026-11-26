@@ -16,13 +16,13 @@ This repository contains multiple projects and historical work areas. This catal
 
 **Path:** `Business/Marketing/gavin_schilling_marketing/`
 
-**Type:** Django 4.1-era application with a marketing website, website models, a payroll module, and a Dockerfile.
+**Type:** Django 5.2.19 application on Python 3.12, with a marketing website, website models, a disabled legacy payroll module, and a local-development Dockerfile.
 
 **Security boundary:** the legacy employee model contains a Social Security number field. The public SSN handler is disabled on `master` and returns HTTP 410 without reading submitted data. The current root URL configuration does not route to payroll intake, but the handler remains disabled as an additional fail-closed measure. Do not reactivate SSN collection without encryption, least-privilege access, audit logging, retention/deletion, backups, incident response, and legal/privacy review.
 
 **Credential boundary:** the historical Django signing key and Google API key were embedded in public source. [PR #2](https://github.com/SchillingEnterprises/Gavin-Schilling/pull/2) merged the environment-driven configuration and removed the values from current source. Old values remain in Git history; this code change does not revoke or rotate them. Revoke any still-active historical Google key and generate a new Django signing key before deployment.
 
-**Runtime status:** the pinned Django 4.1 release is end-of-life. This project is not ready for production until the framework, third-party dependencies, database setup, authentication, and hosting target are upgraded and tested.
+**Runtime status:** the repository-root `requirements.txt` now pins Django 5.2.19 and its direct dependencies. GitHub Actions validates the app on Python 3.12, checks production settings and migrations, runs Django tests, and builds and smoke-checks the scoped Docker image. The container is for local development only; it is not a production deployment. The legacy payroll module remains disabled, and the app is not approved for payroll or employee data.
 
 ## 3. Operations website and asset collection
 

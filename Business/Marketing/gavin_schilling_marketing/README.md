@@ -4,7 +4,7 @@ This is one of several preserved projects inside the Gavin-Schilling repository.
 
 ## Current state
 
-- Django 4.1-era project and dependencies.
+- Django 5.2.19; the maintained CI/runtime baseline is Python 3.12, with direct dependencies pinned in the repository-root `requirements.txt`.
 - Marketing website routes remain separate from the static Schilling Enterprises brand pages.
 - The legacy payroll app is deliberately disabled in `INSTALLED_APPS`; its prototype models and forms are preserved but not loaded by Django.
 - Public SSN intake is disabled. The legacy Employee SSN field remains in the existing schema for compatibility but is now non-editable and not registered in admin. No SSN data is deleted or exposed through a view.
@@ -12,10 +12,32 @@ This is one of several preserved projects inside the Gavin-Schilling repository.
 
 ## Local setup
 
-Install requirements from this subproject directory, export the variables from `.env.example`, and run Django commands from this project's root. Do not place real credentials in the example file or Git.
+From the repository root, install the pinned dependencies and then run commands from this project directory:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+cd Business/Marketing/gavin_schilling_marketing
+python manage.py check
+python manage.py test
+```
+
+Export the required variables from `.env.example` in your shell or container environment. Django does not automatically load `.env` files. Never put real credentials in the example file or Git.
 
 ## Security and privacy
 
-See [SECURITY.md](SECURITY.md). Rotate the previously exposed Google API key and replace the historical Django signing key before any deployment. The current requirements pin Django 4.1, an end-of-life release, so this app is not production-ready until its framework and third-party packages are upgraded and validated.
+## Local-development container
+
+Build from the repository root so the project retains its documented path layout:
+
+```bash
+docker build --file Business/Marketing/gavin_schilling_marketing/Dockerfile --tag gavin-marketing:dev .
+```
+
+The image runs as a non-root user, contains only this Django project and the pinned requirements, and exposes port 8000. It is a local-development image, not a production server. A smoke check is part of GitHub Actions; deployment, persistent database configuration, HTTPS, backups, monitoring, and operational ownership are not provided by this container.
+
+## Security and privacy
+
+See [SECURITY.md](SECURITY.md). Rotate the previously exposed Google API key and replace the historical Django signing key before any deployment. Django 5.2.19 and the Python 3.12 CI baseline are maintained, but this prototype is still not approved for production or real payroll/employee data.
 
 Do not submit, store, or test with real Social Security numbers in this prototype.

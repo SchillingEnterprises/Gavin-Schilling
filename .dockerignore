@@ -1,0 +1,17 @@
+# Keep the Docker build context limited to this app and its shared lock input.
+**
+!requirements.txt
+!Business/
+!Business/Marketing/
+!Business/Marketing/gavin_schilling_marketing/
+!Business/Marketing/gavin_schilling_marketing/**
+
+# Never send local secrets, databases, or generated Python files to the builder.
+Business/Marketing/gavin_schilling_marketing/.env
+Business/Marketing/gavin_schilling_marketing/.env.*
+!Business/Marketing/gavin_schilling_marketing/.env.example
+Business/Marketing/gavin_schilling_marketing/**/__pycache__/
+Business/Marketing/gavin_schilling_marketing/**/*.py[cod]
+Business/Marketing/gavin_schilling_marketing/**/*.sqlite
+Business/Marketing/gavin_schilling_marketing/**/*.sqlite3
+Business/Marketing/gavin_schilling_marketing/**/*.db
