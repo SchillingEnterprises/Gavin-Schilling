@@ -63,3 +63,12 @@ jobs:
       - name: Run marketing Django tests
         working-directory: Business/Marketing/gavin_schilling_marketing
         run: python manage.py test --verbosity 2
+      - name: Build and smoke-check the development container
+        run: |
+          docker build --file Business/Marketing/gavin_schilling_marketing/Dockerfile --tag gavin-marketing:ci .
+          docker run --rm \
+            --env DJANGO_SECRET_KEY=ci-only-container-check-key-long-enough \
+            --env DJANGO_DEBUG=true \
+            --env DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1 \
+            --env DJANGO_DB_NAME=/tmp/gavin-marketing-container-ci.sqlite3 \
+            gavin-marketing:ci check
