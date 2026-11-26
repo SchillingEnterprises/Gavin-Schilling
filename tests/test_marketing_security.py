@@ -86,6 +86,17 @@ class MarketingSecurityTests(unittest.TestCase):
         self.assertNotIn("RunPython", migration)
         self.assertNotIn("DeleteModel", migration)
 
+    def test_legacy_payroll_dependencies_are_not_installed(self):
+        requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8").lower()
+        self.assertIn("django-localflavor==5.1", requirements)
+        self.assertNotIn("django-localflavor-us", requirements)
+        self.assertNotIn("django-phonenumbers", requirements)
+
+    def test_marketing_ci_uses_supported_python(self):
+        workflow = (ROOT / ".github" / "workflows" / "marketing-security.yml").read_text(encoding="utf-8")
+        self.assertIn('python-version: "3.12"', workflow)
+        self.assertNotIn('python-version: "3.10"', workflow)
+
     def test_local_environment_template_contains_only_placeholders(self):
         template = (APP / ".env.example").read_text(encoding="utf-8")
         self.assertIn("DJANGO_SECRET_KEY=generate-a-long-random-secret", template)
