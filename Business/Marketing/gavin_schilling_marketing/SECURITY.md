@@ -1,53 +1,49 @@
 # Security Policy — Marketing and Payroll Subproject
 
+## Current runtime and compatibility baseline
+
+The current application baseline is Django 5.2.19 with Python 3.12 CI, using the repository-root `requirements.txt`. GitHub Actions installs the pinned dependencies and runs source checks, Django system and deployment checks, migration consistency checks, application tests, and a scoped local-development container smoke check.
+
+The actively imported model fields and historical migrations use third-party field packages. The current direct pins include:
+
+- `django-address==0.2.8`
+- `django-localflavor==5.1`
+- `django-money==3.6.2`
+- `django-phonenumber-field==9.0.0`
+- `phonenumbers==9.0.44`
+
+Do not remove or upgrade these packages solely from a version-number assumption. Model definitions and historical migrations import their field classes. Review actual imports, model fields, migration dependencies, and database compatibility together before changing these pins. Run `pip-audit`, Django system/deployment checks, migration consistency, and the full test suite against disposable CI databases.
+
+The app remains a prototype, not a production service. Passing CI does not establish hosting, operational, legal, privacy, or data-protection readiness.
+
 ## Credential rotation
 
-The legacy marketing Django project previously stored its signing key and Google API key in source files. Current code reads credentials from environment variables instead. Because the repository is public, assume historical values in Git history are exposed.
+The legacy marketing project previously stored a Django signing key and Google API key in source files. Current code reads those values from environment variables, but historical values remain visible in the public Git history. Treat them as exposed.
 
-**Required owner action:** revoke and rotate the previously committed Google API key in Google Cloud Console, restrict any replacement to the exact APIs and approved domains, and generate a new DJANGO_SECRET_KEY. Store both only in the deployment provider's secret manager. Replacing the Django signing key invalidates existing sessions and signed reset links.
+**Required owner action:** complete [the credential-rotation and privacy release issue](https://github.com/SchillingEnterprises/Gavin-Schilling/issues/21). Revoke any still-active historical Google API key in Google Cloud Console, restrict a replacement to the exact approved APIs and domains, generate a new unique `DJANGO_SECRET_KEY`, and store both only in the deployment provider's secret manager. Replacing the Django signing key invalidates existing sessions and signed reset links. Do not post credential values in issues, pull requests, chat, or logs.
 
 ## Sensitive payroll data
 
-The legacy Employee model includes a Social Security number field. The older intake view accepted an SSN form but did not store the submitted value. That intake view now returns HTTP 410 Gone and is not routed. The payroll app has been removed from `INSTALLED_APPS`, and the retained Employee SSN field is non-editable and not registered in admin. Existing data is preserved; do not reactivate collection or display.
+The legacy Employee model retains a Social Security number field in the existing schema for compatibility. The field is non-editable and is not registered in Django admin. The payroll app is removed from `INSTALLED_APPS`; the old public intake view returns HTTP 410 Gone without reading submitted data and is not routed by the current URL configuration.
 
-Before any future SSN or payroll workflow is implemented, require a security and privacy design that covers a lawful collection purpose, encryption at rest and in transit, access controls and least privilege, audit trails, retention/deletion, backups, incident response, and appropriate legal/compliance review. Never write full SSNs to application logs, analytics, emails, or client-side storage.
+Existing database content is preserved. Do not inspect, export, alter, migrate, replace, or delete the tracked SQLite database as part of ordinary optimization or CI. Never submit, store, or test with real Social Security numbers in this prototype.
+
+Before any future payroll or SSN workflow is implemented, require a separate lawful-purpose and privacy design covering encryption at rest and in transit, authentication and authorization, least privilege, audit trails, retention/deletion, backups, incident response, and appropriate legal/compliance review. Never write full SSNs to logs, analytics, emails, or client-side storage.
 
 ## Runtime hardening
 
-- DEBUG defaults to false.
-- `DJANGO_SECRET_KEY` is required and must contain at least 50 characters and at least 5 distinct characters. Generate a fresh unique value with `python -c 'import secrets; print(secrets.token_urlsafe(64))'`.
-- ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS are environment controlled.
-- HTTPS redirects and secure cookies default on outside DEBUG.
-- HSTS defaults off until deployment HTTPS and domain configuration are verified.
-- No real credentials belong in .env.example or source history.
+- `DEBUG` defaults to false and boolean environment values are validated explicitly.
+- `DJANGO_SECRET_KEY` is required and must be at least 50 characters with at least 5 distinct characters. Generate a fresh value with `python -c 'import secrets; print(secrets.token_urlsafe(64))'`.
+- `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` are environment controlled.
+- HTTPS redirects and secure session/CSRF cookies default on outside DEBUG.
+- HSTS defaults off until HTTPS and domain configuration are verified.
+- The example environment file contains placeholders only; it is not loaded automatically by Django.
+- GitHub Actions uses disposable CI database paths and does not need or inspect the tracked SQLite database.
 
-## Legacy framework
+## Deployment boundary
 
-The subproject pins Django 4.1, which is an end-of-life release. Do not deploy it as a new public service. Upgrade the framework and third-party dependencies in a separately tested compatibility effort before production use.
+The Docker image is for local development only. No production deployment, managed persistent database, verified host configuration, backup/restore process, monitoring, or operational ownership is provided. Do not deploy the app with real payroll, employee, client, or other sensitive personal data. Keep the SSN intake disabled unless a separately reviewed and approved system replaces this prototype.
 
-### Dependency compatibility gate
-
-Do not upgrade the Django version by changing only the `Django==4.1` line:
-
-- The current dependency set includes `django-address==0.2.8`. Its published package requirements list Django 2.2/3.0 and Python 3.5–3.8, not the current runtime. The maintained project models use its `AddressField`, and historical migrations import its model field.
-- The current `django-localflavor==3.1` release predates Django 4.x support. A maintained 5.1 release supports Django 4.2 through 6.0, but moving between major package generations requires checking the US state and postal-code fields used by the app and migrations.
-- The pinned `django-money==3.0.0` and `django-phonenumber-field==6.3.0` also need a coordinated compatibility review rather than being assumed compatible with a newer Django release.
-
-The preferred framework target is the Django 5.2 LTS series, currently at 5.2.19, with extended support through April 2028. Use a maintained Python runtime (3.12 or newer) for the upgraded app and CI.
-
-The current GitHub Actions workflow also still runs Python 3.10. Python 3.10 reached upstream end-of-life on October 1, 2026 and no longer receives security updates. Move CI and any deployment runtime to a supported Python release as part of the same staged upgrade; do not treat the current green Python 3.10 run as evidence of a supported runtime.
-
-### Required upgrade sequence
-
-1. Inventory the app's active imports, model fields, forms, admin usage, and migration dependencies for `address`, localflavor, money, and phone-number packages.
-2. Design a supported replacement or compatibility layer for the address package. Preserve the existing address table, primary keys, and foreign-key relationships; do not discard or recreate address records.
-3. Upgrade Django and compatible third-party packages together, recording the chosen versions and constraints.
-4. Run dependency checks, Django system/deployment checks, migration consistency, and application tests on Python 3.12–3.14 using only disposable CI databases.
-5. Rehearse the full migration on an owner-approved, protected copy with representative address and employee/client relationships. Compare row counts and foreign-key integrity without exposing real payroll data.
-6. Keep the app marked non-production until the migration rehearsal, secret rotation, hosting configuration, backup/restore, and privacy controls are complete.
-
-Never use the tracked SQLite database for CI or upgrade rehearsals. Do not inspect, replace, migrate, or remove it as part of this compatibility work without a separate approved data-handling plan.
-
-The subproject pins Django 4.1, which is an end-of-life release. Do not deploy it as a new public service. Upgrade the framework and third-party dependencies in a separately tested compatibility effort before production use.
+## Reporting
 
 Report vulnerabilities privately through GitHub's private vulnerability reporting feature when available.
