@@ -136,6 +136,18 @@ class MarketingSecurityTests(unittest.TestCase):
         self.assertIn('python-version: "3.12"', workflow)
         self.assertNotIn('python-version: "3.10"', workflow)
 
+    def test_security_documents_match_the_current_runtime_baseline(self):
+        root_policy = (ROOT / "SECURITY.md").read_text(encoding="utf-8")
+        app_policy = (APP / "SECURITY.md").read_text(encoding="utf-8")
+        for policy in (root_policy, app_policy):
+            with self.subTest(policy="security documentation"):
+                self.assertIn("Django 5.2.19", policy)
+                self.assertIn("Python 3.12", policy)
+                self.assertNotIn("Django 4.1", policy)
+                self.assertNotIn("Python 3.10", policy)
+        self.assertIn("issues/21", root_policy)
+        self.assertIn("issues/21", app_policy)
+
     def test_local_environment_template_contains_only_placeholders(self):
         template = (APP / ".env.example").read_text(encoding="utf-8")
         self.assertIn("DJANGO_SECRET_KEY=\n", template)
