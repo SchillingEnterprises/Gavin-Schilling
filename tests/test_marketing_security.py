@@ -65,7 +65,7 @@ class MarketingSecurityTests(unittest.TestCase):
         self.assertIn('len(SECRET_KEY) < 50', SETTINGS)
         self.assertIn('len(set(SECRET_KEY)) < 5', SETTINGS)
         self.assertIn('DEBUG = env_bool("DJANGO_DEBUG", False)', SETTINGS)
-        self.assertNotRegex(SETTINGS, r"(?m)^SECRET_KEY\\s*=\\s*['\\\"]")
+        self.assertNotRegex(SETTINGS, r"(?m)^SECRET_KEY\s*=\s*['\"]")
 
     def test_short_and_low_diversity_signing_keys_fail_closed(self):
         weak_keys = (
@@ -138,7 +138,7 @@ class MarketingSecurityTests(unittest.TestCase):
 
     def test_local_environment_template_contains_only_placeholders(self):
         template = (APP / ".env.example").read_text(encoding="utf-8")
-        self.assertIn("DJANGO_SECRET_KEY=\\n", template)
+        self.assertIn("DJANGO_SECRET_KEY=\n", template)
         self.assertIn("secrets.token_urlsafe(64)", template)
         self.assertNotRegex(template, r"AIza[0-9A-Za-z_-]{20,}")
 
