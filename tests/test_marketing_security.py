@@ -3,6 +3,8 @@ from pathlib import Path
 import ast
 import os
 import re
+import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 
@@ -41,6 +43,51 @@ class MarketingSecurityTests(unittest.TestCase):
         self.assertIn('os.environ.get("DJANGO_SECRET_KEY")', SETTINGS)
         self.assertIn('DEBUG = env_bool("DJANGO_DEBUG", False)', SETTINGS)
         self.assertNotRegex(SETTINGS, r"(?m)^SECRET_KEY\s*=\s*['\"]")
+
+    def test_short_and_low_diversity_signing_keys_fail_closed(self):
+        weak_keys = (
+            ("short-secret", "at least 50 characters"),
+            (("A" * 59) + "b", "5 distinct characters"),
+        )
+        for weak_key, expected_message in weak_keys:
+            with self.subTest(key=weak_key[:8]):
+                env = os.environ.copy()
+                env.update({
+                    "DJANGO_SETTINGS_MODULE": "gavin_schilling_marketing.settings",
+                    "DJANGO_SECRET_KEY": weak_key,
+                    "DJANGO_DEBUG": "true",
+                    "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
+                    "PYTHONPATH": str(APP),
+                })
+                result = subprocess.run(
+                    [sys.executable, "-c", "from django.conf import settings; print(settings.SECRET_KEY)"],
+                    cwd=APP,
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(expected_message, result.stderr)
+
+    def test_valid_high_diversity_signing_key_is_accepted(self):
+        env = os.environ.copy()
+        env.update({
+            "DJANGO_SETTINGS_MODULE": "gavin_schilling_marketing.settings",
+            "DJANGO_SECRET_KEY": "test-only-marketing-key-with-at-least-fifty-characters-and-varied-alphabet",
+            "DJANGO_DEBUG": "true",
+            "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
+            "PYTHONPATH": str(APP),
+        })
+        result = subprocess.run(
+            [sys.executable, "-c", "from django.conf import settings; assert len(settings.SECRET_KEY) >= 50"],
+            cwd=APP,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
 
     def test_hosts_and_https_security_are_configured(self):
         for item in (
