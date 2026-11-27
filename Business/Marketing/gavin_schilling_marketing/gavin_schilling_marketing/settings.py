@@ -113,17 +113,94 @@ WSGI_APPLICATION = 'gavin_schilling_marketing.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        # Keep the historical project database as the local default, while
-        # allowing CI and hosted environments to use an isolated database.
-        'NAME': os.environ.get(
-            "DJANGO_DB_NAME",
-            str(BASE_DIR / 'Business/Marketing/gavin_schilling_marketing/db.sqlite3'),
-        ),
+DB_ENGINE = os.environ.get("DJANGO_DB_ENGINE", "sqlite").strip().lower()
+if DB_ENGINE == "sqlite":
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "DJANGO_DB_ENGINE=postgresql (or postgres) is required when DJANGO_DEBUG is false."
+        )
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.environ.get(
+                "DJANGO_DB_NAME",
+                str(BASE_DIR / "Business/Marketing/gavin_schilling_marketing/db.sqlite3"),
+            ),
+            "OPTIONS": {"timeout": 20},
+        }
     }
-}
+elif DB_ENGINE in {"postgres", "postgresql"}:
+    required_db_values = (
+        "DJANGO_DB_NAME",
+        "DJANGO_DB_USER",
+        "DJANGO_DB_PASSWORD",
+        "DJANGO_DB_HOST",
+    )
+    missing_db_values = [
+        name for name in required_db_values if not os.environ.get(name, "").strip()
+    ]
+    if missing_db_values:
+        raise ImproperlyConfigured(
+            "PostgreSQL requires these environment variables: "
+            + ", ".join(missing_db_values)
+        )
+
+    raw_db_port = os.environ.get("DJANGO_DB_PORT", "5432").strip() or "5432"
+    try:
+        db_port = int(raw_db_port)
+    except ValueError as exc:
+        raise ImproperlyConfigured(
+            "DJANGO_DB_PORT must be an integer between 1 and 65535."
+        ) from exc
+    if not 1 <= db_port <= 65_535:
+        raise ImproperlyConfigured(
+            "DJANGO_DB_PORT must be an integer between 1 and 65535."
+        )
+
+    db_sslmode = (
+        os.environ.get("DJANGO_DB_SSLMODE", "verify-full").strip().lower()
+        or "verify-full"
+    )
+    if db_sslmode not in {"verify-ca", "verify-full"}:
+        raise ImproperlyConfigured(
+            "DJANGO_DB_SSLMODE must verify the server certificate "
+            "(verify-ca or verify-full)."
+        )
+
+    raw_conn_max_age = (
+        os.environ.get("DJANGO_DB_CONN_MAX_AGE", "60").strip() or "60"
+    )
+    try:
+        conn_max_age = int(raw_conn_max_age)
+    except ValueError as exc:
+        raise ImproperlyConfigured(
+            "DJANGO_DB_CONN_MAX_AGE must be an integer between 0 and 3600."
+        ) from exc
+    if not 0 <= conn_max_age <= 3_600:
+        raise ImproperlyConfigured(
+            "DJANGO_DB_CONN_MAX_AGE must be an integer between 0 and 3600."
+        )
+
+    db_options = {"sslmode": db_sslmode}
+    db_sslrootcert = os.environ.get("DJANGO_DB_SSLROOTCERT", "").strip()
+    if db_sslrootcert:
+        db_options["sslrootcert"] = db_sslrootcert
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["DJANGO_DB_NAME"].strip(),
+            "USER": os.environ["DJANGO_DB_USER"].strip(),
+            "PASSWORD": os.environ["DJANGO_DB_PASSWORD"],
+            "HOST": os.environ["DJANGO_DB_HOST"].strip(),
+            "PORT": str(db_port),
+            "CONN_MAX_AGE": conn_max_age,
+            "CONN_HEALTH_CHECKS": True,
+            "OPTIONS": db_options,
+        }
+    }
+else:
+    raise ImproperlyConfigured("DJANGO_DB_ENGINE must be sqlite or postgresql.")
 
 
 # Password validation
