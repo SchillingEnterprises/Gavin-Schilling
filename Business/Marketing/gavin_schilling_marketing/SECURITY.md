@@ -15,7 +15,7 @@ Before any future SSN or payroll workflow is implemented, require a security and
 ## Runtime hardening
 
 - DEBUG defaults to false.
-- SECRET_KEY is required from DJANGO_SECRET_KEY.
+- `DJANGO_SECRET_KEY` is required and must contain at least 50 characters and at least 5 distinct characters. Generate a fresh unique value with `python -c 'import secrets; print(secrets.token_urlsafe(64))'`.
 - ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS are environment controlled.
 - HTTPS redirects and secure cookies default on outside DEBUG.
 - HSTS defaults off until deployment HTTPS and domain configuration are verified.
