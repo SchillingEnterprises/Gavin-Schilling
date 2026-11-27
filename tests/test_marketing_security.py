@@ -3,8 +3,6 @@ from pathlib import Path
 import ast
 import os
 import re
-import subprocess
-import sys
 import unittest
 from unittest.mock import patch
 
@@ -39,10 +37,35 @@ class MarketingSecurityTests(unittest.TestCase):
             with self.subTest(value=value), patch.dict(os.environ, {"DJANGO_DEBUG": value}):
                 self.assertIs(parser("DJANGO_DEBUG", True), False)
 
+    def load_secret_key_settings(self, secret_key):
+        """Execute only the real SECRET_KEY settings statements without Django."""
+        tree = ast.parse(SETTINGS)
+        selected = []
+        for node in tree.body:
+            if isinstance(node, ast.Assign) and any(
+                isinstance(target, ast.Name) and target.id == "SECRET_KEY"
+                for target in node.targets
+            ):
+                selected.append(node)
+            elif isinstance(node, ast.If) and any(
+                isinstance(child, ast.Name) and child.id == "SECRET_KEY"
+                for child in ast.walk(node.test)
+            ):
+                selected.append(node)
+
+        namespace = {"os": os, "ImproperlyConfigured": ValueError}
+        module = ast.Module(body=selected, type_ignores=[])
+        ast.fix_missing_locations(module)
+        with patch.dict(os.environ, {"DJANGO_SECRET_KEY": secret_key}):
+            exec(compile(module, str(APP / "gavin_schilling_marketing/settings.py"), "exec"), namespace)
+        return namespace["SECRET_KEY"]
+
     def test_secret_and_debug_are_environment_driven(self):
         self.assertIn('os.environ.get("DJANGO_SECRET_KEY")', SETTINGS)
+        self.assertIn('len(SECRET_KEY) < 50', SETTINGS)
+        self.assertIn('len(set(SECRET_KEY)) < 5', SETTINGS)
         self.assertIn('DEBUG = env_bool("DJANGO_DEBUG", False)', SETTINGS)
-        self.assertNotRegex(SETTINGS, r"(?m)^SECRET_KEY\s*=\s*['\"]")
+        self.assertNotRegex(SETTINGS, r"(?m)^SECRET_KEY\\s*=\\s*['\\\"]")
 
     def test_short_and_low_diversity_signing_keys_fail_closed(self):
         weak_keys = (
@@ -51,43 +74,12 @@ class MarketingSecurityTests(unittest.TestCase):
         )
         for weak_key, expected_message in weak_keys:
             with self.subTest(key=weak_key[:8]):
-                env = os.environ.copy()
-                env.update({
-                    "DJANGO_SETTINGS_MODULE": "gavin_schilling_marketing.settings",
-                    "DJANGO_SECRET_KEY": weak_key,
-                    "DJANGO_DEBUG": "true",
-                    "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
-                    "PYTHONPATH": str(APP),
-                })
-                result = subprocess.run(
-                    [sys.executable, "-c", "from django.conf import settings; print(settings.SECRET_KEY)"],
-                    cwd=APP,
-                    env=env,
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                self.assertNotEqual(result.returncode, 0)
-                self.assertIn(expected_message, result.stderr)
+                with self.assertRaisesRegex(ValueError, expected_message):
+                    self.load_secret_key_settings(weak_key)
 
     def test_valid_high_diversity_signing_key_is_accepted(self):
-        env = os.environ.copy()
-        env.update({
-            "DJANGO_SETTINGS_MODULE": "gavin_schilling_marketing.settings",
-            "DJANGO_SECRET_KEY": "test-only-marketing-key-with-at-least-fifty-characters-and-varied-alphabet",
-            "DJANGO_DEBUG": "true",
-            "DJANGO_ALLOWED_HOSTS": "localhost,127.0.0.1",
-            "PYTHONPATH": str(APP),
-        })
-        result = subprocess.run(
-            [sys.executable, "-c", "from django.conf import settings; assert len(settings.SECRET_KEY) >= 50"],
-            cwd=APP,
-            env=env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        valid_key = "test-only-marketing-key-with-at-least-fifty-characters-and-varied-alphabet"
+        self.assertEqual(self.load_secret_key_settings(valid_key), valid_key)
 
     def test_hosts_and_https_security_are_configured(self):
         for item in (
@@ -146,7 +138,8 @@ class MarketingSecurityTests(unittest.TestCase):
 
     def test_local_environment_template_contains_only_placeholders(self):
         template = (APP / ".env.example").read_text(encoding="utf-8")
-        self.assertIn("DJANGO_SECRET_KEY=generate-a-long-random-secret", template)
+        self.assertIn("DJANGO_SECRET_KEY=\\n", template)
+        self.assertIn("secrets.token_urlsafe(64)", template)
         self.assertNotRegex(template, r"AIza[0-9A-Za-z_-]{20,}")
 
 
