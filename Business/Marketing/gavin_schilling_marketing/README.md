@@ -22,7 +22,7 @@ python manage.py check
 python manage.py test
 ```
 
-Export the required variables from `.env.example` in your shell or container environment. Django does not automatically load `.env` files. Never put real credentials in the example file or Git.
+Export the required variables from `.env.example` in your shell or container environment. Django does not automatically load `.env` files. `DJANGO_SECRET_KEY` must contain at least 50 characters and at least 5 distinct characters; generate a fresh value with `python -c 'import secrets; print(secrets.token_urlsafe(64))'`. Never put real credentials in the example file or Git.
 
 ## Security and privacy
 
