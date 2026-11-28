@@ -4,7 +4,7 @@ This is one of several preserved projects inside the Gavin-Schilling repository.
 
 ## Current state
 
-- Django 5.2.19; the maintained CI/runtime baseline is Python 3.12, with direct dependencies pinned in the repository-root `requirements.txt`.
+- Django 6.1.3; the maintained CI/runtime baseline is Python 3.12, with direct dependencies pinned in the repository-root `requirements.txt`.
 - Marketing website routes remain separate from the static Schilling Enterprises brand pages.
 - The legacy payroll app is deliberately disabled in `INSTALLED_APPS`; its prototype models and forms are preserved but not loaded by Django.
 - Public SSN intake is disabled. The legacy Employee SSN field remains in the existing schema for compatibility but is now non-editable and not registered in admin. No SSN data is deleted or exposed through a view.
@@ -24,8 +24,6 @@ python manage.py test
 
 Export the required variables from `.env.example` in your shell or container environment. Django does not automatically load `.env` files. `DJANGO_SECRET_KEY` must contain at least 50 characters and at least 5 distinct characters; generate a fresh value with `python -c 'import secrets; print(secrets.token_urlsafe(64))'`. Never put real credentials in the example file or Git.
 
-## Security and privacy
-
 ## Local-development container
 
 Build from the repository root so the project retains its documented path layout:
@@ -38,6 +36,6 @@ The image runs as a non-root user, contains only this Django project and the pin
 
 ## Security and privacy
 
-See [SECURITY.md](SECURITY.md). Rotate the previously exposed Google API key and replace the historical Django signing key before any deployment. Django 5.2.19 and the Python 3.12 CI baseline are maintained, but this prototype is still not approved for production or real payroll/employee data.
+See [SECURITY.md](SECURITY.md). Rotate the previously exposed Google API key and replace the historical Django signing key before any deployment. Django 6.1.3 and the Python 3.12 CI baseline are maintained, but this prototype is still not approved for production or real payroll/employee data.
 
 Do not submit, store, or test with real Social Security numbers in this prototype.

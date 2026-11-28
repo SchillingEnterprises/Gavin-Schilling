@@ -39,7 +39,7 @@ The nested Django project requires a separate backend host and is not executed b
 - No claims that prototypes are deployed products.
 - The nested payroll/SSN intake is disabled on `master`; the security hardening was merged in [PR #2](https://github.com/SchillingEnterprises/Gavin-Schilling/pull/2). The endpoint returns HTTP 410 and does not process submitted identifiers.
 - Historical signing-key and Google API-key values remain in Git history. Revoke any still-active historical Google key and use a newly generated Django signing key before any deployment; current source configuration alone cannot rotate credentials.
-- The marketing/payroll Django prototype now uses Django 5.2.19 with Python 3.12 CI and a scoped development-container build. Payroll remains disabled, and the prototype is not production-ready.
+- The marketing/payroll Django prototype now uses Django 6.1.3 with Python 3.12 CI and a scoped development-container build. Payroll remains disabled, and the prototype is not production-ready.
 - Review brand/logo permissions and personal-data exposure before publishing nested operations or client assets.
 - Marketing is integrated-selective, not a general-purpose agency offer.
 
